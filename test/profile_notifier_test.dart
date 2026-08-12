@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:fieldlog_flutter/src/features/profile/application/profile_providers.dart';
-import 'package:fieldlog_flutter/src/features/profile/data/fake_profile_repository.dart';
-import 'package:fieldlog_flutter/src/features/profile/domain/profile.dart';
-import 'package:fieldlog_flutter/src/features/profile/domain/profile_repository.dart';
+import 'package:fieldlog_i18n/src/features/profile/application/profile_providers.dart';
+import 'package:fieldlog_i18n/src/features/profile/data/fake_profile_repository.dart';
+import 'package:fieldlog_i18n/src/features/profile/domain/profile.dart';
+import 'package:fieldlog_i18n/src/features/profile/domain/profile_repository.dart';
 
 /// A test-only fake repository that lets us assert what was saved.
 class _RecordingRepository implements ProfileRepository {

@@ -1,7 +1,7 @@
-name: fieldlog_flutter
+name: fieldlog_i18n
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.5.0+5
+version: 0.5.1+51
 
 # Week 5 (E05.1): AsyncNotifier — explicit handling of loading, data, error,
 # and empty states for the new logs feature.
@@ -14,6 +14,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  khmer_text:
+    path: ../khmer_text
   cupertino_icons: ^1.0.8
   go_router: ^14.6.0
   # Week 4: state management + dependency injection.
@@ -32,3 +37,22 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
+
+  # Both Khmer faces travel with the app so the comparison screen is the same
+  # on every device. Both are SIL Open Font License 1.1 — embedding in a
+  # commercial app is allowed; the licence text ships alongside, which is the
+  # part people forget.
+  fonts:
+    - family: Kantumruy Pro
+      fonts:
+        - asset: assets/fonts/KantumruyPro-Regular.ttf
+        - asset: assets/fonts/KantumruyPro-Bold.ttf
+          weight: 700
+    - family: Noto Sans Khmer
+      fonts:
+        - asset: assets/fonts/NotoSansKhmer-VF.ttf
+
+  assets:
+    - assets/fonts/KantumruyPro-OFL.txt
+    - assets/fonts/NotoSansKhmer-OFL.txt

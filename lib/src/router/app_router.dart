@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../features/logs/presentation/logs_list_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
+import '../features/typography/presentation/khmer_fonts_screen.dart';
+import '../features/typography/presentation/khmer_typography_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 
 /// The global router for FieldLog.
@@ -19,11 +21,25 @@ class AppRouter {
   static const onboardingPath = '/';
   static const profilePath = '/profile/:name';
   static const logsPath = '/logs';
+  static const typographyPath = '/typography';
+  static const fontsPath = '/fonts';
 
   static String profilePathFor(String name) => '/profile/$name';
 
+  /// Where the app opens. Overridable at build time so a screenshot script can
+  /// land straight on the screen it wants:
+  ///
+  ///     flutter build apk --dart-define=INITIAL_ROUTE=/logs
+  ///
+  /// Never read at runtime from anything a user controls — this is a compile
+  /// time constant, and it defaults to the real entry point.
+  static const initialRoute = String.fromEnvironment(
+    'INITIAL_ROUTE',
+    defaultValue: onboardingPath,
+  );
+
   static final GoRouter router = GoRouter(
-    initialLocation: onboardingPath,
+    initialLocation: initialRoute,
     routes: [
       GoRoute(
         path: onboardingPath,
@@ -42,6 +58,16 @@ class AppRouter {
         path: logsPath,
         name: 'logs',
         builder: (context, state) => const LogsListScreen(),
+      ),
+      GoRoute(
+        path: typographyPath,
+        name: 'typography',
+        builder: (context, state) => const KhmerTypographyScreen(),
+      ),
+      GoRoute(
+        path: fontsPath,
+        name: 'fonts',
+        builder: (context, state) => const KhmerFontsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

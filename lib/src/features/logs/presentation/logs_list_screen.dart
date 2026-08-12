@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:khmer_text/khmer_text.dart';
 
+import '../../../../l10n/generated/app_localizations.dart';
+import '../../../l10n/locale_controller.dart';
 import '../application/logs_providers.dart';
 import '../domain/log_entry.dart';
 
@@ -20,15 +23,22 @@ class LogsListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(logsNotifierProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Logs'),
+        title: Text(l10n.logsTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.translate),
+            onPressed: () =>
+                ref.read(localeControllerProvider.notifier).toggle(),
+            tooltip: l10n.language,
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(logsNotifierProvider),
-            tooltip: 'Refresh',
+            tooltip: l10n.refresh,
           ),
         ],
       ),
@@ -46,18 +56,18 @@ class LogsListScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _addSample(ref),
+        onPressed: () => _addSample(ref, l10n),
         icon: const Icon(Icons.add),
-        label: const Text('Add sample'),
+        label: Text(l10n.addSample),
       ),
     );
   }
 
-  void _addSample(WidgetRef ref) {
+  void _addSample(WidgetRef ref, AppLocalizations l10n) {
     ref.read(logsNotifierProvider.notifier).addEntry(
-          title: 'Quick note',
-          body: 'Added at ${DateTime.now()}',
-          category: 'demo',
+          title: l10n.quickNote,
+          body: l10n.savedAt(DateTime.now()),
+          category: l10n.demoCategory,
         );
   }
 }
@@ -94,19 +104,22 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return ListView(
       children: [
         const SizedBox(height: 120),
         Icon(Icons.notes_outlined, size: 72, color: theme.colorScheme.outline),
         const SizedBox(height: 16),
-        Text(
-          'No logs yet',
+        KhmerText(
+          l10n.emptyTitle,
           style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
-        Text(
-          'Tap "Add sample" below to create your first log.',
+        // KhmerText rather than Text: this sentence is long enough to wrap, and
+        // Khmer gives the line breaker no spaces to work with.
+        KhmerText(
+          l10n.emptyBody(l10n.addSample),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.outline,
           ),
@@ -127,14 +140,15 @@ class _ErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(32),
       children: [
         const SizedBox(height: 80),
         Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
         const SizedBox(height: 16),
-        Text(
-          'Could not load logs',
+        KhmerText(
+          l10n.errorTitle,
           style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
@@ -151,7 +165,7 @@ class _ErrorState extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text(l10n.retry),
           ),
         ),
       ],
@@ -176,8 +190,8 @@ class _DataState extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             leading: const Icon(Icons.note_alt_outlined),
-            title: Text(e.title),
-            subtitle: Text(e.body),
+            title: KhmerText(e.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+            subtitle: KhmerText(e.body, maxLines: 2, overflow: TextOverflow.ellipsis),
             trailing: Chip(label: Text(e.category)),
           ),
         );

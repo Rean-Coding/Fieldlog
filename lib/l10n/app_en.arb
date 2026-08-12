@@ -1,0 +1,85 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "FieldLog",
+  "@appTitle": {
+    "description": "The application name. Not translated — it is a product name."
+  },
+
+  "logsTitle": "Logs",
+  "@logsTitle": {
+    "description": "Title of the screen listing every log entry."
+  },
+
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Tooltip on the button that reloads the list."
+  },
+
+  "addSample": "Add sample",
+  "@addSample": {
+    "description": "Label of the button that appends a demo entry."
+  },
+
+  "emptyTitle": "No logs yet",
+  "@emptyTitle": {
+    "description": "Shown when the list loaded successfully and is empty."
+  },
+
+  "emptyBody": "Tap \"{action}\" below to create your first log.",
+  "@emptyBody": {
+    "description": "Guidance under the empty-state title.",
+    "placeholders": {
+      "action": {
+        "type": "String",
+        "example": "Add sample"
+      }
+    }
+  },
+
+  "errorTitle": "Could not load logs",
+  "@errorTitle": {
+    "description": "Shown when loading the list failed."
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Button that attempts the failed load again."
+  },
+
+  "entryCount": "{count, plural, =0{No entries} =1{1 entry} other{{count} entries}}",
+  "@entryCount": {
+    "description": "Number of entries in the list. Khmer has one plural form for every count, so this resolves to a single case there — which is the reason to use ICU plurals rather than 'if (n == 1)'.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "savedAt": "Saved {when}",
+  "@savedAt": {
+    "description": "Timestamp under an entry.",
+    "placeholders": {
+      "when": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+
+  "language": "Language",
+  "@language": {
+    "description": "Tooltip on the control that switches locale."
+  },
+
+  "quickNote": "Quick note",
+  "@quickNote": {
+    "description": "Title given to a demo entry."
+  },
+
+  "demoCategory": "demo",
+  "@demoCategory": {
+    "description": "Category given to a demo entry."
+  }
+}
