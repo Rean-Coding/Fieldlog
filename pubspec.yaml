@@ -1,9 +1,9 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.7.0+7
+version: 0.8.0+8
 
-# Week 7 (E07.1): Local persistence with Drift. FakeLogsRepository is replaced
+# Week 8: Mid-term checkpoint — no new code. Same persistence layer as W7.
 # by DriftLogsRepository — a real SQLite-backed implementation. Service,
 # Notifier, and UI do not change.
 
