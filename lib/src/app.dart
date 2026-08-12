@@ -1,29 +1,35 @@
 import 'package:flutter/material.dart';
 
-import 'features/onboarding/presentation/onboarding_screen.dart';
+import 'router/app_router.dart';
 
 /// The root widget of FieldLog.
 ///
-/// Holds app-wide configuration ONLY: title, theme, and the first route.
-/// No business logic lives here — that belongs in feature folders under
-/// `lib/src/features/<feature>/`.
-///
-/// In Week 2 the `home:` below is replaced by a `go_router` configuration.
+/// Week 2 update: switched to [MaterialApp.router] so all navigation flows
+/// through our declarative [AppRouter]. Theme is centralised here using
+/// Material 3 with the AEU teal seed colour, in both light and dark variants.
 class FieldLogApp extends StatelessWidget {
   const FieldLogApp({super.key});
 
+  static const _seed = Color(0xFF0F766E); // AEU teal seed
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'FieldLog',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: _seed),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0F766E), // AEU teal seed
+          seedColor: _seed,
+          brightness: Brightness.dark,
         ),
       ),
-      home: const OnboardingScreen(),
+      themeMode: ThemeMode.system,
+      routerConfig: AppRouter.router,
     );
   }
 }
