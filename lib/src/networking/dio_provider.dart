@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../config/app_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -16,7 +17,7 @@ part 'dio_provider.g.dart';
 Dio dio(DioRef ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: 'https://fieldlog-api.example.com',
+      baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 15),
       sendTimeout: const Duration(seconds: 10),

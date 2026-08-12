@@ -1,12 +1,11 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.12.0+12
+version: 0.13.0+13
 
-# Week 12 (E12.1): The Testing Pyramid. Unit tests for Services (mocktail);
-# Notifier tests with ProviderContainer + overrideWith; widget tests for the
-# four async states; golden tests for empty and error states; integration
-# test for the happy path.
+# Week 13 (E13.1): CI/CD with GitHub Actions. Three Android flavors
+# (dev / staging / prod) with --dart-define. Signed AAB published to
+# Play Store internal testing track via r0adkll/upload-google-play.
 
 environment:
   sdk: ^3.5.0
@@ -37,7 +36,6 @@ dev_dependencies:
   build_runner: ^2.4.13
   riverpod_generator: ^2.4.0
   drift_dev: ^2.20.0
-  # W12: testing
   mocktail: ^1.0.4
   golden_toolkit: ^0.15.0
 
