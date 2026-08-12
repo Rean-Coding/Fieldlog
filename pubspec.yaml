@@ -1,7 +1,7 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.13.0+13
+version: 0.14.0+14
 
 # Week 13 (E13.1): CI/CD with GitHub Actions. Three Android flavors
 # (dev / staging / prod) with --dart-define. Signed AAB published to
