@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../router/app_router.dart';
-
 /// The first screen of FieldLog.
 ///
 /// Week 2 update: the screen now collects a name in a [TextField] and
@@ -38,7 +36,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
       return;
     }
-    context.push(AppRouter.profilePathFor(name));
+    context.push('/profile/\$name');
   }
 
   @override

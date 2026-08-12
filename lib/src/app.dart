@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'router/app_router.dart';
 
-class FieldLogApp extends StatelessWidget {
+class FieldLogApp extends ConsumerWidget {
   const FieldLogApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'FieldLog',
       debugShowCheckedModeBanner: false,
@@ -24,7 +25,7 @@ class FieldLogApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      routerConfig: AppRouter.router,
+      routerConfig: ref.watch(appRouterProvider),
     );
   }
 }
