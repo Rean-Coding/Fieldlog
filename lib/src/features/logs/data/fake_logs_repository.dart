@@ -1,15 +1,21 @@
 import 'dart:math';
 
+import '../domain/failure.dart';
 import '../domain/log_entry.dart';
 import '../domain/logs_repository.dart';
+import '../domain/result.dart';
 
-/// In-memory fake of [LogsRepository] used for Week 5.
+/// In-memory fake of [LogsRepository] used for Week 6.
 ///
-/// Simulates real-world conditions:
-/// - 1-second network latency on every operation
-/// - 20% random failure rate on [fetchAll] so students see the error state
+/// W6 change vs W5: instead of throwing exceptions on the 20% failure case,
+/// the repository now RETURNS a `Failed<T>` carrying a typed [NetworkFailure].
+/// No `throw` from this class. Errors are values now.
 ///
-/// In Week 7 this is replaced by `DriftLogsRepository` (real local database).
+/// Different failure variants are simulated to demonstrate exhaustive pattern
+/// matching at the call site:
+///   - 20% NetworkFailure
+///   - 5%  UnauthorizedFailure (simulates an expired token)
+///   - rest succeed
 class FakeLogsRepository implements LogsRepository {
   FakeLogsRepository();
 
@@ -18,22 +24,28 @@ class FakeLogsRepository implements LogsRepository {
   int _nextId = 1;
 
   @override
-  Future<List<LogEntry>> fetchAll() async {
+  Future<Result<List<LogEntry>>> fetchAll() async {
     await Future.delayed(const Duration(seconds: 1));
-    // 20% failure rate — surfaces the error state in the UI
-    if (_random.nextInt(5) == 0) {
-      throw Exception('Network unavailable. Please try again.');
+    final roll = _random.nextInt(100);
+    if (roll < 20) {
+      return const Failed(NetworkFailure());
     }
-    return List.unmodifiable(_entries.reversed);
+    if (roll < 25) {
+      return const Failed(UnauthorizedFailure());
+    }
+    return Success(List.unmodifiable(_entries.reversed));
   }
 
   @override
-  Future<LogEntry> add({
+  Future<Result<LogEntry>> add({
     required String title,
     required String body,
     required String category,
   }) async {
     await Future.delayed(const Duration(milliseconds: 500));
+    if (title.trim().isEmpty) {
+      return const Failed(UnknownFailure(message: 'Title cannot be empty.'));
+    }
     final entry = LogEntry(
       id: _nextId++,
       title: title,
@@ -42,6 +54,6 @@ class FakeLogsRepository implements LogsRepository {
       category: category,
     );
     _entries.add(entry);
-    return entry;
+    return Success(entry);
   }
 }

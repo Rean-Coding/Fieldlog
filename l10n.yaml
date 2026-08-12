@@ -1,7 +1,0 @@
-arb-dir: lib/l10n
-template-arb-file: app_en.arb
-output-localization-file: app_localizations.dart
-# Written into lib/ rather than a hidden package, so the reader can open the
-# generated class and see what gen_l10n actually produced.
-output-dir: lib/l10n/generated
-nullable-getter: false

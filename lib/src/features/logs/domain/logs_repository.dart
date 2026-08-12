@@ -1,20 +1,20 @@
+import 'failure.dart';
 import 'log_entry.dart';
+import 'result.dart';
 
 /// Abstract data-source contract for log entries.
 ///
-/// The Service depends on this — never on a concrete implementation. In Week 7
-/// we swap [FakeLogsRepository] for `DriftLogsRepository` and nothing in the
-/// service or notifier changes. That's Rule S4 (depend on abstractions) paying
-/// off.
+/// Week 6 change: methods return `Future<Result<T>>` instead of `Future<T>`.
+/// Failures are now first-class values flowing up the call chain.
+///
+/// In Week 7 we swap [FakeLogsRepository] for `DriftLogsRepository` and the
+/// Service / Notifier / UI does not change.
 abstract class LogsRepository {
   /// Returns all log entries, newest first.
-  ///
-  /// May fail with an exception in Week 5 (we are still throwing).
-  /// In Week 6 this becomes `Future<Result<List<LogEntry>>>`.
-  Future<List<LogEntry>> fetchAll();
+  Future<Result<List<LogEntry>>> fetchAll();
 
   /// Persists a new log entry.
-  Future<LogEntry> add({
+  Future<Result<LogEntry>> add({
     required String title,
     required String body,
     required String category,

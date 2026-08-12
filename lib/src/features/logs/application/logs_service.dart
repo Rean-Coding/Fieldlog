@@ -1,34 +1,39 @@
+import '../domain/failure.dart';
 import '../domain/log_entry.dart';
 import '../domain/logs_repository.dart';
+import '../domain/result.dart';
 
-/// Application-layer service for the logs feature.
+/// Application-layer service for the logs feature — Week 6 version.
 ///
-/// Six rules of a Service (from Week 3):
-///   S1 — one per feature                       ✓ LogsService
-///   S2 — stateless (no instance fields holding UI state)  ✓
-///   S3 — returns domain types                  ✓ List<LogEntry>
-///   S4 — depends on abstractions               ✓ LogsRepository (abstract)
-///   S5 — no Flutter import                     ✓ Pure Dart
-///   S6 — orchestrates, doesn't render          ✓ No widgets here
+/// W6 change vs W5: signatures now return `Future<Result<T>>`. The Service
+/// passes failures up the chain unchanged. Failures are first-class values,
+/// not invisible exceptions.
 ///
-/// Note: this Service does NOT know about `AsyncValue`. AsyncValue is a
-/// presentation/Notifier concept — wrapping the eventual result in
-/// loading/data/error states. The Service just returns plain Dart values and
-/// throws on failure (until Week 6 when we move to Result types).
+/// The Six Rules of a Service (W3) still all apply:
+///   S1 ✓ one per feature
+///   S2 ✓ stateless
+///   S3 ✓ returns domain types (Result<List<LogEntry>>)
+///   S4 ✓ depends on abstractions
+///   S5 ✓ no Flutter import
+///   S6 ✓ orchestrates, doesn't render
 class LogsService {
   const LogsService(this._repository);
 
   final LogsRepository _repository;
 
   /// Loads the user's logs, newest first.
-  Future<List<LogEntry>> loadAll() => _repository.fetchAll();
+  Future<Result<List<LogEntry>>> loadAll() => _repository.fetchAll();
 
-  /// Records a new log entry. The domain operation — not "insert".
-  Future<LogEntry> recordToday({
+  /// Records a new log entry. Validation is the Service's responsibility —
+  /// not the Repository's. A blank title returns a domain failure.
+  Future<Result<LogEntry>> recordToday({
     required String title,
     required String body,
     String category = 'general',
-  }) {
+  }) async {
+    if (title.trim().isEmpty) {
+      return const Failed(UnknownFailure(message: 'Title cannot be blank.'));
+    }
     return _repository.add(title: title, body: body, category: category);
   }
 }
