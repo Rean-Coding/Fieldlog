@@ -100,6 +100,8 @@ class _ErrorState extends StatelessWidget {
     final theme = Theme.of(context);
     final (icon, title) = switch (failure) {
       NetworkFailure() => (Icons.wifi_off, 'Network unavailable'),
+      TimeoutFailure() => (Icons.timer_off, 'Request timed out'),
+      ServerFailure() => (Icons.cloud_off, 'Server error'),
       NotFoundFailure() => (Icons.search_off, 'Not found'),
       UnauthorizedFailure() => (Icons.lock_outline, 'Please sign in'),
       UnknownFailure() => (Icons.error_outline, 'Something went wrong'),

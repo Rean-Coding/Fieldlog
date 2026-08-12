@@ -1,11 +1,10 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.9.0+9
+version: 0.10.0+10
 
-# Week 9 (E09.1): Offline-first sync. Writes go to the local DB immediately
-# and queue a row in pending_sync. SyncService drains the queue when called
-# (in production, on connectivity-restored events from connectivity_plus).
+# Week 10 (E10.1): Real networking with Dio. The fake sync engine becomes a
+# real HTTP call. DioException → Failure mapping lives in the data layer.
 
 environment:
   sdk: ^3.5.0
@@ -23,8 +22,9 @@ dependencies:
   sqlite3: ^2.4.0
   sqlite3_flutter_libs: ^0.5.24
   path: ^1.9.0
-  # W9: connectivity events (used in production wiring; demo uses manual trigger)
   connectivity_plus: ^6.1.0
+  # W10: networking
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
