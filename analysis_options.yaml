@@ -1,0 +1,22 @@
+# Lint rules for FieldLog.
+# These enforce the OOP rules of engagement from Week 1.
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Immutability by default
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    # Encapsulation & clarity
+    avoid_print: true # use a logger, not print
+    require_trailing_commas: true
+    # Safety
+    always_declare_return_types: true
+    avoid_empty_else: true
+
+analyzer:
+  errors:
+    # Treat these as build-breaking, not warnings
+    avoid_print: error

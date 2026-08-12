@@ -1,0 +1,26 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# Generated platform folders — run `flutter create .` after cloning.
+# Anchored to the root on purpose: an unanchored `android/` would also swallow
+# platform/android/, which holds hand-written Kotlin that nothing regenerates.
+/android/
+/ios/
+/windows/
+/macos/
+/linux/
+/web/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Never commit signing material
+*.jks
+*.keystore
+key.properties
+**/google-services.json
