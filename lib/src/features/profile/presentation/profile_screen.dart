@@ -1,49 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../application/profile_service.dart';
-import '../data/fake_profile_repository.dart';
+import '../application/profile_providers.dart';
 
-/// Profile screen — Week 3 refactor.
+/// Profile screen — Week 4 refactor.
 ///
-/// This screen now consumes the [ProfileService] only — it does NOT touch
-/// the repository directly. Week 4 replaces the manual service instantiation
-/// here with a Riverpod provider so dependency injection is centralised.
-class ProfileScreen extends StatefulWidget {
+/// Was a StatefulWidget that manually constructed a Service. Now it is a
+/// ConsumerStatefulWidget that reads the [profileNotifierProvider] for state
+/// and calls the notifier for actions. The Service and Repository are
+/// invisible to this file — that's the whole point of Riverpod DI.
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key, required this.name});
 
   final String name;
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  // NOTE — manual wiring this week; in W4 Riverpod replaces this.
-  late final ProfileService _service = ProfileService(FakeProfileRepository());
-
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _saving = false;
-  String? _savedRole;
 
   Future<void> _enrol() async {
     setState(() => _saving = true);
-    final profile = await _service.enrol(
-      id: widget.name.toLowerCase(),
-      name: widget.name,
-    );
+    await ref.read(profileNotifierProvider.notifier).enrol(
+          id: widget.name.toLowerCase(),
+          name: widget.name,
+        );
     if (!mounted) return;
-    setState(() {
-      _saving = false;
-      _savedRole = profile.role;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Enrolled ${profile.name} as ${profile.role}')),
-    );
+    setState(() => _saving = false);
+    final profile = ref.read(profileNotifierProvider);
+    if (profile != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Enrolled ${profile.name} as ${profile.role}')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // ref.watch — subscribe; rebuild when state changes.
+    final profile = ref.watch(profileNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -72,8 +71,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 24),
               Text('Hello, ${widget.name}!', style: theme.textTheme.headlineMedium),
               const SizedBox(height: 8),
-              if (_savedRole != null)
-                Text('Enrolled as $_savedRole', style: theme.textTheme.bodyLarge),
+              if (profile != null)
+                Text(
+                  'Enrolled as ${profile.role}',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _saving ? null : _enrol,
