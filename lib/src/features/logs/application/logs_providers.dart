@@ -1,6 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../data/fake_logs_repository.dart';
+import '../../../data/app_database.dart';
+import '../data/drift_logs_repository.dart';
+import '../data/logs_dao.dart';
 import '../domain/failure.dart';
 import '../domain/log_entry.dart';
 import '../domain/logs_repository.dart';
@@ -10,18 +12,31 @@ import 'logs_service.dart';
 part 'logs_providers.g.dart';
 
 // ─────────────────────────────────────────────────────────────
-// Week 6: The Notifier unpacks Result<T> into AsyncData / AsyncError.
+// Week 7: The Service / Notifier code did not change vs Week 6.
+// Only the Repository provider returns a Drift-backed implementation now.
 //
-// The Service now returns Result<T>. The Notifier converts:
-//   Success<T>  → AsyncData<T>
-//   Failed<T>   → AsyncError carrying the Failure
-//
-// The UI never sees Result. It still pattern-matches on AsyncValue.
+// This is Rule S4 (depend on abstractions) earning its keep:
+//   - Service ✓ unchanged
+//   - Notifier ✓ unchanged
+//   - UI ✓ unchanged
+//   - One line of provider wiring → real persistence end to end.
 // ─────────────────────────────────────────────────────────────
 
 @Riverpod(keepAlive: true)
+AppDatabase appDatabase(AppDatabaseRef ref) {
+  final db = AppDatabase();
+  ref.onDispose(db.close);
+  return db;
+}
+
+@Riverpod(keepAlive: true)
+LogsDao logsDao(LogsDaoRef ref) {
+  return LogsDao(ref.watch(appDatabaseProvider));
+}
+
+@Riverpod(keepAlive: true)
 LogsRepository logsRepository(LogsRepositoryRef ref) {
-  return FakeLogsRepository();
+  return DriftLogsRepository(ref.watch(logsDaoProvider));
 }
 
 @Riverpod(keepAlive: true)
@@ -53,7 +68,6 @@ class LogsNotifier extends _$LogsNotifier {
       category: category,
     );
     if (result is Failed<LogEntry>) {
-      // Surface the failure to the UI via AsyncError.
       state = AsyncError(result.failure, StackTrace.current);
       return;
     }

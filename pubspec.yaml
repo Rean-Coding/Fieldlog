@@ -1,14 +1,11 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.6.0+6
+version: 0.7.0+7
 
-# Week 6 (E06.1): Sealed errors with a Failure union and Result<T>.
-# Repositories return Result instead of throwing; the UI pattern-matches
-# on Failure variants for typed error rendering.
-# and empty states for the new logs feature.
-# services in widgets is replaced by Riverpod providers — the application
-# layer's dependency injection mechanism.
+# Week 7 (E07.1): Local persistence with Drift. FakeLogsRepository is replaced
+# by DriftLogsRepository — a real SQLite-backed implementation. Service,
+# Notifier, and UI do not change.
 
 environment:
   sdk: ^3.5.0
@@ -18,19 +15,23 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   go_router: ^14.6.0
-  # Week 4: state management + dependency injection.
   flutter_riverpod: ^2.5.1
   riverpod_annotation: ^2.3.5
+  # Week 7: local SQLite via Drift.
+  drift: ^2.20.0
+  drift_flutter: ^0.2.0
+  # Imported directly for SqliteException.
+  sqlite3: ^2.4.0
+  sqlite3_flutter_libs: ^0.5.24
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  # Code generation toolchain
   build_runner: ^2.4.13
   riverpod_generator: ^2.4.0
-  custom_lint: ^0.6.4
-  riverpod_lint: ^2.3.10
+  drift_dev: ^2.20.0
 
 flutter:
   uses-material-design: true
