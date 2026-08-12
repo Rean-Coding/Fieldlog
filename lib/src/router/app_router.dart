@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/logs/presentation/logs_list_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 
@@ -17,6 +18,7 @@ class AppRouter {
 
   static const onboardingPath = '/';
   static const profilePath = '/profile/:name';
+  static const logsPath = '/logs';
 
   static String profilePathFor(String name) => '/profile/$name';
 
@@ -35,6 +37,11 @@ class AppRouter {
           final name = state.pathParameters['name'] ?? 'friend';
           return ProfileScreen(name: name);
         },
+      ),
+      GoRoute(
+        path: logsPath,
+        name: 'logs',
+        builder: (context, state) => const LogsListScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

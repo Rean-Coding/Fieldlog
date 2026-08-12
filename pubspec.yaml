@@ -1,9 +1,10 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.4.0+4
+version: 0.5.0+5
 
-# Week 4 (E04.1): Riverpod 2.x with code generation. Manual instantiation of
+# Week 5 (E05.1): AsyncNotifier — explicit handling of loading, data, error,
+# and empty states for the new logs feature.
 # services in widgets is replaced by Riverpod providers — the application
 # layer's dependency injection mechanism.
 
