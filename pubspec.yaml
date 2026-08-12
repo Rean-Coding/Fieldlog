@@ -1,10 +1,12 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.11.0+11
+version: 0.12.0+12
 
-# Week 11 (E11.1): Auth and route guards. JWT tokens in secure storage;
-# refresh on 401 (with queue); go_router redirect: enforces sign-in.
+# Week 12 (E12.1): The Testing Pyramid. Unit tests for Services (mocktail);
+# Notifier tests with ProviderContainer + overrideWith; widget tests for the
+# four async states; golden tests for empty and error states; integration
+# test for the happy path.
 
 environment:
   sdk: ^3.5.0
@@ -24,16 +26,20 @@ dependencies:
   path: ^1.9.0
   connectivity_plus: ^6.1.0
   dio: ^5.7.0
-  # W11: secure token storage
   flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^4.0.0
   build_runner: ^2.4.13
   riverpod_generator: ^2.4.0
   drift_dev: ^2.20.0
+  # W12: testing
+  mocktail: ^1.0.4
+  golden_toolkit: ^0.15.0
 
 flutter:
   uses-material-design: true
