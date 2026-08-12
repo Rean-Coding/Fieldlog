@@ -22,7 +22,7 @@ final appDatabaseProvider = Provider<AppDatabase>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef AppDatabaseRef = ProviderRef<AppDatabase>;
-String _$logsDaoHash() => r'2b13b2c7763b75fb40e71b046544d1fbadbc0a4d';
+String _$logsDaoHash() => r'ec9982cf81ae6dc801b283166e389a17ea093bfc';
 
 /// See also [logsDao].
 @ProviderFor(logsDao)
@@ -38,7 +38,7 @@ final logsDaoProvider = Provider<LogsDao>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef LogsDaoRef = ProviderRef<LogsDao>;
-String _$logsRepositoryHash() => r'c50b5c6b510ce3aa7f97266b31295d5d4585c6c6';
+String _$logsRepositoryHash() => r'e0de54dc0030970dc444c9caed5a40ed7e87c9de';
 
 /// See also [logsRepository].
 @ProviderFor(logsRepository)
@@ -55,7 +55,7 @@ final logsRepositoryProvider = Provider<LogsRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef LogsRepositoryRef = ProviderRef<LogsRepository>;
-String _$logsServiceHash() => r'f2005a5bc1b132baeb84217db98374c5ea37b516';
+String _$logsServiceHash() => r'20ccb2d481b44ca72d920d1030dc3acb0daee875';
 
 /// See also [logsService].
 @ProviderFor(logsService)
@@ -71,7 +71,26 @@ final logsServiceProvider = Provider<LogsService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef LogsServiceRef = ProviderRef<LogsService>;
-String _$logsNotifierHash() => r'5e559cf5f4dfa8783e95f97b46622ef86f13083a';
+String _$syncServiceHash() => r'11773556ef428e3bca7928ceeeb67bee199480a9';
+
+/// W9: the SyncService is a long-lived Service. KeepAlive ensures it lives
+/// for the lifetime of the app — the documented S2 exception.
+///
+/// Copied from [syncService].
+@ProviderFor(syncService)
+final syncServiceProvider = Provider<SyncService>.internal(
+  syncService,
+  name: r'syncServiceProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$syncServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SyncServiceRef = ProviderRef<SyncService>;
+String _$logsNotifierHash() => r'7b93edcb9904110c37cf7403087cfd9866a04b12';
 
 /// See also [LogsNotifier].
 @ProviderFor(LogsNotifier)

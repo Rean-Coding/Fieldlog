@@ -5,4 +5,5 @@ part of 'logs_dao.dart';
 // ignore_for_file: type=lint
 mixin _$LogsDaoMixin on DatabaseAccessor<AppDatabase> {
   $LogEntriesTable get logEntries => attachedDatabase.logEntries;
+  $PendingSyncTable get pendingSync => attachedDatabase.pendingSync;
 }

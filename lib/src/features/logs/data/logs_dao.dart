@@ -4,25 +4,14 @@ import '../../../data/app_database.dart';
 
 part 'logs_dao.g.dart';
 
-// ─────────────────────────────────────────────────────────────
-// Week 7: The Data Access Object for log entries.
-//
-// The DAO completes the data-layer chain:
-//   Widget → Notifier → Service → Repository (abstract) → DAO → SQLite
-//
-// Why DAO + Repository instead of just Repository:
-//   - The Repository is the abstract contract the Service depends on.
-//   - The DAO is the concrete SQL layer. Drift generates much of it.
-//   - Keeping them separate means the Repository can use multiple DAOs
-//     in W9 when we add a SyncEngine + pending_sync table.
-// ─────────────────────────────────────────────────────────────
+// Week 9: DAO gains an offline-first insert that writes to LogEntries AND
+// enqueues a PendingSync row in the same transaction. Either both succeed or
+// neither does.
 
-@DriftAccessor(tables: [LogEntries])
+@DriftAccessor(tables: [LogEntries, PendingSync])
 class LogsDao extends DatabaseAccessor<AppDatabase> with _$LogsDaoMixin {
   LogsDao(super.db);
 
-  /// Streaming query — the UI subscribes via Riverpod's StreamProvider and
-  /// updates automatically on every insert / update / delete.
   Stream<List<LogEntryRow>> watchAll() {
     return (select(logEntries)
           ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
@@ -35,22 +24,31 @@ class LogsDao extends DatabaseAccessor<AppDatabase> with _$LogsDaoMixin {
         .get();
   }
 
-  Future<int> insert({
+  /// Week 9 offline-first insert: write locally + enqueue for sync.
+  /// Both writes happen in one Drift transaction.
+  Future<int> insertWithPendingSync({
     required String title,
     required String body,
     required String category,
-  }) {
-    return into(logEntries).insert(
-      LogEntriesCompanion.insert(
-        title: title,
-        body: body,
-        createdAt: DateTime.now(),
-        category: Value(category),
-      ),
-    );
-  }
-
-  Future<int> deleteById(int id) {
-    return (delete(logEntries)..where((t) => t.id.equals(id))).go();
+  }) async {
+    return transaction(() async {
+      final id = await into(logEntries).insert(
+        LogEntriesCompanion.insert(
+          title: title,
+          body: body,
+          createdAt: DateTime.now(),
+          category: Value(category),
+          isPending: const Value(true),
+        ),
+      );
+      await into(pendingSync).insert(
+        PendingSyncCompanion.insert(
+          logEntryId: id,
+          operation: 'create',
+          queuedAt: DateTime.now(),
+        ),
+      );
+      return id;
+    });
   }
 }

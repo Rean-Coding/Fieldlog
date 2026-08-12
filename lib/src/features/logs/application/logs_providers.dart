@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../data/app_database.dart';
+import '../../../sync/sync_service.dart';
 import '../data/drift_logs_repository.dart';
 import '../data/logs_dao.dart';
 import '../domain/failure.dart';
@@ -11,17 +12,6 @@ import 'logs_service.dart';
 
 part 'logs_providers.g.dart';
 
-// ─────────────────────────────────────────────────────────────
-// Week 7: The Service / Notifier code did not change vs Week 6.
-// Only the Repository provider returns a Drift-backed implementation now.
-//
-// This is Rule S4 (depend on abstractions) earning its keep:
-//   - Service ✓ unchanged
-//   - Notifier ✓ unchanged
-//   - UI ✓ unchanged
-//   - One line of provider wiring → real persistence end to end.
-// ─────────────────────────────────────────────────────────────
-
 @Riverpod(keepAlive: true)
 AppDatabase appDatabase(AppDatabaseRef ref) {
   final db = AppDatabase();
@@ -30,26 +20,27 @@ AppDatabase appDatabase(AppDatabaseRef ref) {
 }
 
 @Riverpod(keepAlive: true)
-LogsDao logsDao(LogsDaoRef ref) {
-  return LogsDao(ref.watch(appDatabaseProvider));
-}
+LogsDao logsDao(LogsDaoRef ref) => LogsDao(ref.watch(appDatabaseProvider));
 
 @Riverpod(keepAlive: true)
-LogsRepository logsRepository(LogsRepositoryRef ref) {
-  return DriftLogsRepository(ref.watch(logsDaoProvider));
-}
+LogsRepository logsRepository(LogsRepositoryRef ref) =>
+    DriftLogsRepository(ref.watch(logsDaoProvider));
 
 @Riverpod(keepAlive: true)
-LogsService logsService(LogsServiceRef ref) {
-  return LogsService(ref.watch(logsRepositoryProvider));
-}
+LogsService logsService(LogsServiceRef ref) =>
+    LogsService(ref.watch(logsRepositoryProvider));
+
+/// W9: the SyncService is a long-lived Service. KeepAlive ensures it lives
+/// for the lifetime of the app — the documented S2 exception.
+@Riverpod(keepAlive: true)
+SyncService syncService(SyncServiceRef ref) =>
+    SyncService(ref.watch(appDatabaseProvider));
 
 @riverpod
 class LogsNotifier extends _$LogsNotifier {
   @override
   Future<List<LogEntry>> build() async {
-    final service = ref.read(logsServiceProvider);
-    final result = await service.loadAll();
+    final result = await ref.read(logsServiceProvider).loadAll();
     return switch (result) {
       Success<List<LogEntry>>(:final value) => value,
       Failed<List<LogEntry>>(:final failure) => throw failure,
@@ -61,16 +52,26 @@ class LogsNotifier extends _$LogsNotifier {
     required String body,
     String category = 'general',
   }) async {
-    final service = ref.read(logsServiceProvider);
-    final result = await service.recordToday(
-      title: title,
-      body: body,
-      category: category,
-    );
+    final result = await ref.read(logsServiceProvider).recordToday(
+          title: title,
+          body: body,
+          category: category,
+        );
     if (result is Failed<LogEntry>) {
       state = AsyncError(result.failure, StackTrace.current);
       return;
     }
+    ref.invalidateSelf();
+    // Fire-and-forget: try syncing in the background.
+    // ignore: unawaited_futures
+    ref.read(syncServiceProvider).triggerSync().then((_) {
+      ref.invalidateSelf();
+    });
+  }
+
+  /// Manual "drain queue" trigger from the UI (e.g. a sync button).
+  Future<void> sync() async {
+    await ref.read(syncServiceProvider).triggerSync();
     ref.invalidateSelf();
   }
 }

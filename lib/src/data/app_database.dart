@@ -4,25 +4,13 @@ import 'package:drift_flutter/drift_flutter.dart';
 part 'app_database.g.dart';
 
 // ─────────────────────────────────────────────────────────────
-// Week 7: The application's local SQLite database, managed by Drift.
+// Week 9: Schema v2 — adds the pending_sync table.
 //
-// Why Drift over sqflite:
-//   - Type-safe SQL: queries are checked at build time, not runtime.
-//   - Reactive streams: watch() lets the UI subscribe to a query and
-//     update automatically when the underlying data changes.
-//   - Migrations are first-class via MigrationStrategy.
-//
-// schemaVersion = 1. Every change to a table from now on bumps this number
-// and adds an onUpgrade step. Migrations get committed to git — never
-// invented at runtime.
+// Offline-first writes go to LogEntries (immediately visible to the user)
+// and a row is added to PendingSync (the queue for the sync engine).
+// When connectivity returns, SyncService drains the queue.
 // ─────────────────────────────────────────────────────────────
 
-/// Table for FieldLog entries.
-///
-/// Drift derives the row class (`LogEntryRow`) and a typed query API
-/// from this declaration during code generation. The Dart class shape MUST
-/// stay decoupled from this: see `LogEntry` in the logs feature's domain
-/// folder. We map between the two at the data-layer boundary.
 // The generated row class is named explicitly so it cannot be
 // confused with the domain entity of the same name. A row is what
 // the database stores; LogEntry is what the app reasons about.
@@ -33,14 +21,26 @@ class LogEntries extends Table {
   TextColumn get body => text()();
   DateTimeColumn get createdAt => dateTime()();
   TextColumn get category => text().withDefault(const Constant('general'))();
+  // W9: a write is pending until the sync engine confirms it.
+  BoolColumn get isPending => boolean().withDefault(const Constant(true))();
 }
 
-@DriftDatabase(tables: [LogEntries])
+class PendingSync extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get logEntryId => integer().references(LogEntries, #id)();
+  // What kind of operation is queued: 'create', 'update', 'delete'.
+  TextColumn get operation => text()();
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastAttemptAt => dateTime().nullable()();
+  DateTimeColumn get queuedAt => dateTime()();
+}
+
+@DriftDatabase(tables: [LogEntries, PendingSync])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,13 +48,13 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
         },
         onUpgrade: (Migrator m, int from, int to) async {
-          // No migrations yet. When the schema changes, add an
-          // `if (from < N)` block here that brings older databases up.
+          if (from < 2) {
+            // W8 → W9 migration: add isPending column + create PendingSync.
+            await m.addColumn(logEntries, logEntries.isPending);
+            await m.createTable(pendingSync);
+          }
         },
       );
 }
 
-QueryExecutor _openConnection() {
-  // drift_flutter handles platform-specific paths and native loading.
-  return driftDatabase(name: 'fieldlog_db');
-}
+QueryExecutor _openConnection() => driftDatabase(name: 'fieldlog_db');

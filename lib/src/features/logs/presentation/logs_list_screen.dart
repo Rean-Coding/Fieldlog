@@ -5,11 +5,11 @@ import '../application/logs_providers.dart';
 import '../domain/failure.dart';
 import '../domain/log_entry.dart';
 
-/// Logs list screen — Week 6 version.
+/// Logs list screen — Week 9: pending badges and a Sync action.
 ///
-/// Same four-state structure as W5. The new piece: the error state now
-/// pattern-matches on the [Failure] variant to give a typed UI per failure,
-/// not just a stringified exception message.
+/// Entries that have been written locally but not yet synced show a small
+/// "PENDING" badge. The AppBar gains a Sync icon button to manually drain
+/// the queue (useful for demos where you can't simulate connectivity).
 class LogsListScreen extends ConsumerWidget {
   const LogsListScreen({super.key});
 
@@ -22,9 +22,10 @@ class LogsListScreen extends ConsumerWidget {
         title: const Text('Logs'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(logsNotifierProvider),
-            tooltip: 'Refresh',
+            icon: const Icon(Icons.sync),
+            onPressed: () =>
+                ref.read(logsNotifierProvider.notifier).sync(),
+            tooltip: 'Sync now',
           ),
         ],
       ),
@@ -57,22 +58,20 @@ class LogsListScreen extends ConsumerWidget {
 class _LoadingState extends StatelessWidget {
   const _LoadingState();
   @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 5,
-      itemBuilder: (_, __) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Container(
-          height: 72,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(8),
+  Widget build(BuildContext context) => ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: 5,
+        itemBuilder: (_, __) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Container(
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _EmptyState extends StatelessWidget {
@@ -87,36 +86,24 @@ class _EmptyState extends StatelessWidget {
         const SizedBox(height: 16),
         Text('No logs yet',
             style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
-        const SizedBox(height: 8),
-        Text(
-          'Tap "Add sample" below to create your first log.',
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.outline),
-          textAlign: TextAlign.center,
-        ),
       ],
     );
   }
 }
 
-/// Typed error state — different UI per Failure variant.
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.failure, required this.onRetry});
-
   final Failure failure;
   final VoidCallback onRetry;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Exhaustive switch — compiler complains if a variant is missed.
     final (icon, title) = switch (failure) {
       NetworkFailure() => (Icons.wifi_off, 'Network unavailable'),
       NotFoundFailure() => (Icons.search_off, 'Not found'),
       UnauthorizedFailure() => (Icons.lock_outline, 'Please sign in'),
       UnknownFailure() => (Icons.error_outline, 'Something went wrong'),
     };
-
     return ListView(
       padding: const EdgeInsets.all(32),
       children: [
@@ -125,13 +112,6 @@ class _ErrorState extends StatelessWidget {
         const SizedBox(height: 16),
         Text(title,
             style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
-        const SizedBox(height: 8),
-        Text(
-          failure.message,
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.outline),
-          textAlign: TextAlign.center,
-        ),
         const SizedBox(height: 24),
         Center(
           child: FilledButton.icon(
@@ -159,12 +139,53 @@ class _DataState extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             leading: const Icon(Icons.note_alt_outlined),
-            title: Text(e.title),
+            title: Row(
+              children: [
+                // Flexible, not Expanded: the title should take the
+                // width it needs and no more, so the badge stays
+                // beside it instead of being pushed to the far edge.
+                Flexible(
+                  child: Text(
+                    e.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (e.isPending) ...[
+                  const SizedBox(width: 8),
+                  const _PendingBadge(),
+                ],
+              ],
+            ),
             subtitle: Text(e.body),
-            trailing: Chip(label: Text(e.category)),
+            trailing: Chip(
+              label: Text(e.category),
+              labelStyle: Theme.of(context).textTheme.labelSmall,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+class _PendingBadge extends StatelessWidget {
+  const _PendingBadge();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade100,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Text(
+        'PENDING',
+        style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
+      ),
     );
   }
 }

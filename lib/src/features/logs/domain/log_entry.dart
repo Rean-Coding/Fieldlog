@@ -1,8 +1,7 @@
-/// A single FieldLog entry — the core domain object for the logs feature.
+/// A single FieldLog entry — the core domain object.
 ///
-/// Immutable by design (Week 1 rule: immutability by default). All fields are
-/// final; equality is value-based via `==` and `hashCode` so two entries with
-/// the same data compare equal regardless of identity.
+/// W9: gains `isPending` flag — true if the entry has been written locally
+/// but not yet confirmed by the sync engine.
 class LogEntry {
   const LogEntry({
     required this.id,
@@ -10,6 +9,7 @@ class LogEntry {
     required this.body,
     required this.createdAt,
     required this.category,
+    this.isPending = false,
   });
 
   final int id;
@@ -17,6 +17,7 @@ class LogEntry {
   final String body;
   final DateTime createdAt;
   final String category;
+  final bool isPending;
 
   LogEntry copyWith({
     int? id,
@@ -24,6 +25,7 @@ class LogEntry {
     String? body,
     DateTime? createdAt,
     String? category,
+    bool? isPending,
   }) {
     return LogEntry(
       id: id ?? this.id,
@@ -31,6 +33,7 @@ class LogEntry {
       body: body ?? this.body,
       createdAt: createdAt ?? this.createdAt,
       category: category ?? this.category,
+      isPending: isPending ?? this.isPending,
     );
   }
 
@@ -42,12 +45,9 @@ class LogEntry {
           other.title == title &&
           other.body == body &&
           other.createdAt == createdAt &&
-          other.category == category;
+          other.category == category &&
+          other.isPending == isPending;
 
   @override
-  int get hashCode => Object.hash(id, title, body, createdAt, category);
-
-  @override
-  String toString() =>
-      'LogEntry(id: $id, title: $title, category: $category)';
+  int get hashCode => Object.hash(id, title, body, createdAt, category, isPending);
 }
