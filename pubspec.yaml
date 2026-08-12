@@ -1,7 +1,7 @@
 name: fieldlog_flutter
 description: "FieldLog — the capstone app for Cross-Platform Mobile Application Development (Master's, Asia Euro University)."
 publish_to: "none"
-version: 0.2.0+2  # Week 2: go_router and Material 3 theming
+version: 0.3.0+3
 
 environment:
   sdk: ^3.5.0

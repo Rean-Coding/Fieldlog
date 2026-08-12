@@ -1,15 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Profile screen — Week 2 placeholder.
+import '../application/profile_service.dart';
+import '../data/fake_profile_repository.dart';
+
+/// Profile screen — Week 3 refactor.
 ///
-/// Receives the user's name as a route path parameter. In Week 3 we'll
-/// refactor this into a proper layered feature folder with an entity,
-/// repository, and service.
-class ProfileScreen extends StatelessWidget {
+/// This screen now consumes the [ProfileService] only — it does NOT touch
+/// the repository directly. Week 4 replaces the manual service instantiation
+/// here with a Riverpod provider so dependency injection is centralised.
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, required this.name});
 
   final String name;
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  // NOTE — manual wiring this week; in W4 Riverpod replaces this.
+  late final ProfileService _service = ProfileService(FakeProfileRepository());
+
+  bool _saving = false;
+  String? _savedRole;
+
+  Future<void> _enrol() async {
+    setState(() => _saving = true);
+    final profile = await _service.enrol(
+      id: widget.name.toLowerCase(),
+      name: widget.name,
+    );
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      _savedRole = profile.role;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Enrolled ${profile.name} as ${profile.role}')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,24 +63,21 @@ class ProfileScreen extends StatelessWidget {
                 radius: 48,
                 backgroundColor: theme.colorScheme.primaryContainer,
                 child: Text(
-                  name.isNotEmpty ? name[0].toUpperCase() : '?',
+                  widget.name.isNotEmpty ? widget.name[0].toUpperCase() : '?',
                   style: theme.textTheme.displayMedium?.copyWith(
                     color: theme.colorScheme.onPrimaryContainer,
                   ),
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                'Hello, $name!',
-                style: theme.textTheme.headlineMedium,
-              ),
+              Text('Hello, ${widget.name}!', style: theme.textTheme.headlineMedium),
               const SizedBox(height: 8),
-              Text(
-                'Profile features will grow from Week 3 onward.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
+              if (_savedRole != null)
+                Text('Enrolled as $_savedRole', style: theme.textTheme.bodyLarge),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _saving ? null : _enrol,
+                child: Text(_saving ? 'Saving…' : 'Enrol me'),
               ),
             ],
           ),
